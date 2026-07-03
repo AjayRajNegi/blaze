@@ -2,9 +2,9 @@ import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
-import { config } from "./src/config/env";
-import { errorMiddleware } from "./src/middleware/error.middleware";
-import { logger } from "./src/utils/logger";
+import { config } from "./config/env";
+import { errorMiddleware } from "./middleware/error.middleware";
+import { logger } from "./utils/logger";
 
 const app = express();
 
@@ -40,7 +40,7 @@ app.get("/health", (req, res) => {
     success: true,
     message: "Server is running.",
     env: config.env,
-    timestam: new Date().toISOString(),
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -52,3 +52,9 @@ app.use((req, res) => {
 });
 
 app.use(errorMiddleware);
+
+app.listen(config.port, () => {
+  logger.info(`Blaze API running on port ${config.port} ${[config.env]}`);
+});
+
+export default app;
