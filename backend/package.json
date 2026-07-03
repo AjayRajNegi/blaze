@@ -3,6 +3,12 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "dev": "bun --env-file=.env.development --watch src/server.ts",
+    "db:generate": "NODE_ENV=development bunx prisma generate",
+    "db:migrate": "NODE_ENV=development bunx prisma migrate dev",
+    "db:studio": "NODE_ENV=development bunx prisma studio"
+  },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
     "@types/bun": "latest",
