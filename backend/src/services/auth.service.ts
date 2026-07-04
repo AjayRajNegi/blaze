@@ -1,5 +1,9 @@
 import { comparePassword, hashedPassword } from "../utils/bcrypt";
-import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
+} from "../utils/jwt";
 import { logger } from "../utils/logger";
 import { prisma } from "../utils/prisma";
 
@@ -125,5 +129,50 @@ export const authService = {
       accessToken,
       refreshToken,
     };
+  },
+
+  async refreshTokens(token: string) {
+    const payload = verifyRefreshToken(token);
+    const stored = await prisma.refreshToken.findUnique({ where: { token } });
+
+    if (!stored || stored.expiresAt < new Date()) {
+      throw new Error("Invalid or expired refresh token.");
+    }
+
+    await prisma.refreshToken.delete({
+      where: { token },
+    });
+
+    const newAccessToken = generateAccessToken({
+      userId: payload.userId,
+      email: payload.email,
+      role: payload.role,
+    });
+
+    const newRefreshToken = generateRefreshToken({
+      userId: payload.userId,
+      email: payload.email,
+      role: payload.role,
+    });
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await prisma.refreshToken.create({
+      data: {
+        token: newRefreshToken,
+        userId: payload.userId,
+        expiresAt,
+      },
+    });
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+  },
+
+  async logout(token: string) {
+    await prisma.refreshToken.deleteMany({
+      where: { token },
+    });
+    logger.info(`User logged out, token revoked.`);
   },
 };
