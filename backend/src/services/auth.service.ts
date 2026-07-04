@@ -1,4 +1,4 @@
-import { hashedPassword } from "../utils/bcrypt";
+import { comparePassword, hashedPassword } from "../utils/bcrypt";
 import { generateAccessToken, generateRefreshToken } from "../utils/jwt";
 import { logger } from "../utils/logger";
 import { prisma } from "../utils/prisma";
@@ -74,5 +74,56 @@ export const authService = {
 
     logger.info(`New User Registered: ${user.email}`);
     return { user, accessToken };
+  },
+
+  async login(input: LoginInput) {
+    const user = await prisma.user.findUnique({
+      where: { email: input.email },
+    });
+
+    if (!user || !user.isActive) {
+      throw new Error("Invalid credentials");
+    }
+
+    const isValid = await comparePassword(input.password, user.passwordHash);
+
+    if (!isValid) {
+      throw new Error("Invalid credentials.");
+    }
+
+    const tokenPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt,
+      },
+    });
+
+    logger.info(`User logged in: ${user.email}`);
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        phone: user.phone,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        isVerified: user.isVerified,
+      },
+      accessToken,
+      refreshToken,
+    };
   },
 };
