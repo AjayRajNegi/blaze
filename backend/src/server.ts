@@ -4,6 +4,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { config } from "./config/env";
 import { errorMiddleware } from "./middleware/error.middleware";
+import v1Routes from "./routes/v1/index";
 import { logger } from "./utils/logger";
 
 const app = express();
@@ -43,6 +44,8 @@ app.get("/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.use("/api/v1", v1Routes);
 
 app.use((req, res) => {
   res.status(404).json({
