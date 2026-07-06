@@ -1,3 +1,4 @@
+import { api } from "@/lib/axios";
 import { LoginResponse } from "@/types";
 import * as SecureStore from "expo-secure-store";
 
