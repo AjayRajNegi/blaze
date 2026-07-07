@@ -22,6 +22,28 @@ export default function login() {
   );
   const { login, isLoading, error, clearError } = useAuthStore();
 
+  const validate = () => {
+    const newErrors: { email?: string; password?: string } = {};
+
+    if (!email.trim()) newErrors.email = "Email is Required";
+    else if (!/\S+@\S+\.\S+/.test(email))
+      newErrors.email = "Enter a valid email";
+    if (!password.trim()) newErrors.password = "Password is Required";
+    else if (password.length < 8) newErrors.password = "Minimum 8 characters.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleLogin = async () => {
+    clearError();
+    if (!validate()) return;
+
+    try {
+      await login(email.trim().toLowerCase(), password);
+      router.replace("/(main)/home");
+    } catch (error) {}
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-[#0A0A0F]">
       <KeyboardAvoidingView
@@ -60,7 +82,7 @@ export default function login() {
               </View>
             )}
 
-            <View className="mb-8" style={{ gap: 16 }}>
+            <View className="my-8" style={{ gap: 16 }}>
               <View>
                 <Text className="text-[#9494A8] text-xs font-semibold tracking-widest uppercase mb-2">
                   Email Address
@@ -124,8 +146,8 @@ export default function login() {
             <TouchableOpacity
               disabled={isLoading}
               activeOpacity={0.85}
-              className="bg-[#E8500A]
-rounded-2xl py-5 items-center mb-5"
+              onPress={handleLogin}
+              className="bg-[#E8500A] rounded-2xl py-5 items-center mb-5"
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
