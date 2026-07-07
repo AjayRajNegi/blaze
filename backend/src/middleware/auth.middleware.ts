@@ -1,9 +1,9 @@
 import type { NextFunction, Response } from "express";
-import { sendError, type AuthenticateRequest } from "../types";
+import { sendError, type AuthenticatedRequest } from "../types";
 import { verifyAccessToken } from "../utils/jwt";
 
 export const authenticate = (
-  req: AuthenticateRequest,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ): void => {
@@ -15,6 +15,10 @@ export const authenticate = (
   }
 
   const token = authHeader.split(" ")[1];
+  if (!token) {
+    sendError(res, "No token provided", 401);
+    return;
+  }
   try {
     const payload = verifyAccessToken(token);
     req.user = payload;
@@ -25,7 +29,7 @@ export const authenticate = (
 };
 
 export const requireAdmin = (
-  req: AuthenticateRequest,
+  req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
 ): void => {
