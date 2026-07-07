@@ -62,8 +62,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     try {
       const res = await authService.register(data);
+      console.log("auth.store.ts:", res.user);
       set({ user: res.user, isAuthenticated: true, isLoading: false });
+      console.log("auth store");
     } catch (error: any) {
+      console.log("auth Store error");
       const message = error.response?.data?.message;
       set({ error: message, isLoading: false });
       throw new Error(message);

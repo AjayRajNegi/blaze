@@ -28,16 +28,17 @@ api.interceptors.response.use(
           refreshToken,
         });
 
-        const { accessToken, refreshTokne: newRefreshToken } = data.data;
+        const { accessToken, refreshToken: newRefreshToken } = data.data;
 
         await SecureStore.setItemAsync("accessToken", accessToken);
-        await SecureStore.setItemAsync("refreshToken", refreshToken);
+        await SecureStore.setItemAsync("refreshToken", newRefreshToken);
 
         original.headers.Authorization = `Bearer ${accessToken}`;
         return api(original);
-      } catch {
+      } catch (refreshError) {
         await SecureStore.deleteItemAsync("accessToken");
         await SecureStore.deleteItemAsync("refreshToken");
+        return Promise.reject(refreshError);
       }
     }
   },

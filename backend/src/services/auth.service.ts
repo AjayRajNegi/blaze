@@ -77,7 +77,7 @@ export const authService = {
     });
 
     logger.info(`New User Registered: ${user.email}`);
-    return { user, accessToken };
+    return { user, accessToken, refreshToken };
   },
 
   async login(input: LoginInput) {

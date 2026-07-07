@@ -13,6 +13,7 @@ export default function Index() {
 
   const checkAuth = async () => {
     const token = await SecureStore.getItemAsync("accessToken");
+    // console.log(token);
     if (token) {
       await loadUser();
 

@@ -55,8 +55,10 @@ export default function register() {
         phone,
         password,
       });
-      router.replace("/(main)/home");
-    } catch (error) {}
+      //router.replace("/(main)/home");
+    } catch (error: any) {
+      console.log(error.message);
+    }
   };
   return (
     <SafeAreaView className="flex-1 bg-[#0A0A0F]">
