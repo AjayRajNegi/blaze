@@ -57,6 +57,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw new Error(message);
     }
   },
+
   register: async (data) => {
     set({ isLoading: true, error: null });
 
@@ -72,6 +73,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw new Error(message);
     }
   },
+
   logout: async () => {
     set({ isLoading: true });
     await authService.logout();
