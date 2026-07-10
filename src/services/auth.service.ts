@@ -10,12 +10,14 @@ export const authService = {
     firstName: string;
     lastName: string;
   }): Promise<LoginResponse> {
+    console.log("AuthServices");
     const res = await api.post("/auth/register", data);
     await authService.saveTokens(
       res.data.data.accessToken,
       res.data.data.refreshToken,
     );
 
+    console.log("auth.service.ts", res.data.data);
     return res.data.data;
   },
 

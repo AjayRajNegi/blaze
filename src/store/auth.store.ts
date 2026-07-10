@@ -26,7 +26,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
-  isLoading: true,
+  isLoading: false,
   error: null,
 
   loadUser: async () => {
@@ -57,18 +57,23 @@ export const useAuthStore = create<AuthState>((set) => ({
       throw new Error(message);
     }
   },
+
   register: async (data) => {
     set({ isLoading: true, error: null });
 
     try {
       const res = await authService.register(data);
+      console.log("auth.store.ts:", res.user);
       set({ user: res.user, isAuthenticated: true, isLoading: false });
+      console.log("auth store");
     } catch (error: any) {
+      console.log("auth Store error");
       const message = error.response?.data?.message;
       set({ error: message, isLoading: false });
       throw new Error(message);
     }
   },
+
   logout: async () => {
     set({ isLoading: true });
     await authService.logout();

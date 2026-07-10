@@ -1,7 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import z, { ZodError } from "zod";
 import { authService } from "../services/auth.service";
-import { sendError, sendSuccess } from "../types";
+import { sendError, sendSuccess, type AuthenticatedRequest } from "../types";
+import { prisma } from "../utils/prisma";
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -60,6 +61,33 @@ export const authController = {
         .parse(req.body);
       const result = await authService.refreshTokens(refreshToken);
       sendSuccess(res, "Token refreshed", result);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async me(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+    try {
+      const user = await prisma.user.findMany({
+        where: {
+          id: req.user!.userId,
+        },
+        select: {
+          id: true,
+          email: true,
+          phone: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          isVerified: true,
+        },
+      });
+
+      if (!user) {
+        sendError(res, "User not found", 404);
+        return;
+      }
+      sendSuccess(res, "User fetched", user);
     } catch (error) {
       next(error);
     }
