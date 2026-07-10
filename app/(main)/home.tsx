@@ -2,6 +2,7 @@ import { citiesService } from "@/services/cities.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useBookingStore } from "@/store/booking.store";
 import { City, Sublocations } from "@/types";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -456,6 +457,113 @@ export default function home() {
           </View>
         </View>
       </Modal>
+
+      {showStartPicker && (
+        <Modal
+          visible={showStartPicker}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setShowStartPicker(false)}
+        >
+          <View className="flex-1 justify-end bg-black/60">
+            <View className="bg-[#13131A] rounded-t-3xl pt-5 pb-10">
+              <View className="w-10 h-1 rounded-full bg-[#22222E] self-center mb-4" />
+              <Text className="text-white font-bold text-xl px-6 mb-2">
+                Pickup Date & Time
+              </Text>
+              <DateTimePicker
+                value={startTime}
+                mode="datetime"
+                display="spinner"
+                minimumDate={new Date()}
+                onChange={(_event: any, date?: Date) => {
+                  if (date) {
+                    setStartTime(date);
+                    const newEnd = new Date(date);
+                    newEnd.setDate(newEnd.getDate() + 1);
+                    if (endTime <= date) setEndTime(newEnd);
+                  }
+                }}
+                textColor="FFFFFF"
+                themeVariant="dark"
+                style={{ backgroundColor: "#13141A" }}
+              />
+
+              <View className="flex-row mx-4 mt-2" style={{ gap: 10 }}>
+                <TouchableOpacity
+                  className="flex-1 py-4 rounded-2xl border border-[#22222E] items-center"
+                  onPress={() => {
+                    setShowStartPicker(false);
+                  }}
+                >
+                  <Text className="text-[#9494A8] font-semibold text-base">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-1 py-4 rounded-2xl bg-[#E8500A] items-center"
+                  onPress={() => setShowStartPicker(false)}
+                >
+                  <Text className="text-white font-bold text-base">
+                    Confirm
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {showEndPicker && (
+        <Modal
+          visible={showEndPicker}
+          animationType="slide"
+          transparent
+          onRequestClose={() => setShowEndPicker(false)}
+        >
+          <View className="flex-1 justify-end bg-black/60">
+            <View className="bg-[#13131A] rounded-t-3xl pt-5 pb-10">
+              <View className="w-10 h-1 rounded-full bg-[#22222E] self-center mb-4" />
+              <Text className="text-white font-bold text-xl px-6 mb-2">
+                Return Date & Time
+              </Text>
+              <DateTimePicker
+                value={endTime}
+                mode="datetime"
+                display="spinner"
+                minimumDate={new Date(startTime.getTime() + 60 * 60 * 1000)}
+                onChange={(_event: any, date?: Date) => {
+                  if (date) setEndTime(date);
+                }}
+                textColor="FFFFFF"
+                themeVariant="dark"
+                style={{ backgroundColor: "#13141A" }}
+              />
+
+              <View className="flex-row mx-4 mt-2" style={{ gap: 10 }}>
+                <TouchableOpacity
+                  className="flex-1 py-4 rounded-2xl border border-[#22222E] items-center"
+                  onPress={() => {
+                    setShowEndPicker(false);
+                  }}
+                >
+                  <Text className="text-[#9494A8] font-semibold text-base">
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-1 py-4 rounded-2xl bg-[#E8500A] items-center"
+                  onPress={() => setShowEndPicker(false)}
+                >
+                  <Text className="text-white font-bold text-base">
+                    Confirm
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      )}
     </SafeAreaView>
   );
 }
