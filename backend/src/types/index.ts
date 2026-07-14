@@ -31,6 +31,6 @@ export const sendError = <T>(
   statusCode = 400,
   error?: string,
 ) => {
-  const response: ApiResponse = { success: true, message, error };
+  const response: ApiResponse = { success: false, message, error };
   return res.status(statusCode).json(response);
 };
