@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -78,6 +79,10 @@ export default function cars() {
     }
   };
 
+  useEffect(() => {
+    applyFilter();
+  }, [cars, activeFilter, sortBy]);
+
   const formatDate = (d: Date | null) => {
     if (!d) return "";
     return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short" });
@@ -88,6 +93,11 @@ export default function cars() {
       ? Math.ceil(draft.endTime.getTime() - draft.startTime.getTime()) /
         (1000 * 60 * 60 * 24)
       : 1;
+
+  const handleSelectCar = (car: Car) => {
+    setCar(car);
+    router.push("/(main)/car-detail");
+  };
 
   const applyFilter = useCallback(() => {
     let result = [...cars];
@@ -225,5 +235,108 @@ export default function cars() {
         />
       )}
     </SafeAreaView>
+  );
+}
+
+function CarCard({
+  car,
+  totalDays,
+  onPress,
+}: {
+  car: Car;
+  totalDays: number;
+  onPress: () => void;
+}) {
+  const totalPrice = car.pricePerDay * totalDays;
+  const fuelColor = FUEL_COLORS[car.fuelType] || "9494A9";
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.85}
+      className="bg-[#13131A] rounded-3xl border border-[#22222E] overflow-hidden"
+    >
+      <View>
+        <Image
+          source={{ uri: car.images[0] }}
+          className="w-full h-44"
+          resizeMode="contain"
+        />
+        <View
+          style={{ backgroundColor: fuelColor + "20" }}
+          className="absolute top-3 left-3 rounded-xl px-3 py-1"
+        >
+          <Text className="text-xs font-bold">{FUEL_LABELS[car.fuelType]}</Text>
+        </View>
+        <View className="absolute top-3 right-3 bg-white/80 border-gray-200 rounded-xl px-3 py-1">
+          <Text className="text-gray-600 text-xs font-semibold">
+            {car.transmission === "AUTOMATIC" ? "Auto" : "Manual"}
+          </Text>
+        </View>
+      </View>
+
+      <View className="p-4 ">
+        <View className="flex-row items-start justify-between mb-3">
+          <View className="flex-1">
+            <Text className="text-white font-bold text-2xl">{car.name}</Text>
+            <Text className=" text-[#9494A8] text-sm foht-medium mt-0.5">
+              {car.brand} • {car.year}
+            </Text>
+          </View>
+          <View className="items-end">
+            <Text className="text-[#e8500a] font-bold text-2xl ">
+              {car.pricePerDay.toLocaleString()}
+            </Text>
+            <Text className="text-[#9494a8] text-xs font-medium">Per Day</Text>
+          </View>
+        </View>
+
+        <View className="flex-row mb-4">
+          {[
+            `${car.seats} Seats`,
+            `${car.kmLimitPerDay} km/day`,
+            `₹${car.extraKmCharge}/km extra`,
+          ].map((spec, i) => (
+            <View
+              key={i}
+              className="bg-[#0a0a0f] border border-[#22222E] rounded-xl px-3 py-1.5"
+            >
+              <Text className="text-white text-xs font-semibold">{spec}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View>
+          {car.features.slice(0, 3).map((f, i) => (
+            <View key={i} className="bg-[#e8500a15] rounded-lg px-2 py-1">
+              <Text className="text-[#e8500a] font-semibold text-xs">{f}</Text>
+            </View>
+          ))}
+          {car.features.length > 3 && (
+            <View className="bg-[#22222e] rounded-lg px-2 py-1">
+              <Text className="text-[#9494a8] text-xs font-semibold">
+                +{car.features.length - 3}
+              </Text>
+            </View>
+          )}
+        </View>
+        <View className="flex-row items-center justify-between pt-3 border-t border-[#22222E]">
+          <View>
+            <Text className="text-[#9494a8] text-xs font-medium">
+              Total for {totalDays} day {totalDays > 1 ? "s" : ""}
+            </Text>
+            <Text className="text-white font-bold text-2xl">
+              ₹{totalPrice.toLocaleString()}
+            </Text>
+          </View>
+
+          <View className="bg-[#E8500A] rounded-2xl px-5 py-3">
+            <Text className="text-white font-bold text-sm tracking-wider">
+              Book Now
+            </Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
   );
 }
