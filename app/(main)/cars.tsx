@@ -248,7 +248,7 @@ function CarCard({
   onPress: () => void;
 }) {
   const totalPrice = car.pricePerDay * totalDays;
-  const fuelColor = FUEL_COLORS[car.fuelType] || "9494A9";
+  const fuelColor = FUEL_COLORS[car.fuelType] || "#9494A9";
 
   return (
     <TouchableOpacity
