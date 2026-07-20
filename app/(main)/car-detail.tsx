@@ -2,7 +2,14 @@ import { carsService } from "@/services/cars.service";
 import { useBookingStore } from "@/store/booking.store";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const FUEL_COLORS: Record<string, string> = {
@@ -74,6 +81,20 @@ export default function carDetail() {
     });
   };
 
+  const specItems = [
+    { label: "Fuel Type", value: FUEL_LABELS[car.fuelType] },
+    {
+      label: "Transmission",
+      value: car.transmission === "AUTOMATIC" ? "Automatic" : "Manual",
+    },
+    { label: "Seats", value: `${car.seats} Persons` },
+    { label: "Year", value: `${car.year}` },
+    {
+      label: "KM Limit",
+      value: "$(car.kmLimitPerDay} km/day",
+    },
+    { label: "Extra KM", value: `${car.extraKmCharge}/km` },
+  ];
   return (
     <SafeAreaView className="flex-1 bg-[#0a0a0f]">
       <View className="flex-row items-center justify-between px-6 pt-4 pb-4">
@@ -181,9 +202,121 @@ export default function carDetail() {
                 {draft?.startTime ? formatTime(draft.startTime) : "-"}
               </Text>
             </View>
+            <View className="w-px bg-[#22222e]" />
+            <View className="flex-1 mr-3">
+              <Text className=" text-[#9494a8] text-xs font-semibold tracking-wider uppercase mb-1">
+                Return
+              </Text>
+              <Text className="text-white font-bold text-base">
+                {draft?.endTime ? formatDate(draft.endTime) : "-"}
+              </Text>
+              <Text className="text-[#5a5a72] text-xs mt-0.5">
+                {draft?.endTime ? formatTime(draft.endTime) : "-"}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="mx-6 mb-6">
+          <Text className="text-white font-bold text-xl mb-4">
+            Specifications
+          </Text>
+          <View className="flex-row flex-wrap" style={{ gap: 10 }}>
+            {specItems.map((spec, i) => (
+              <View
+                key={i}
+                className="bg-[#13131a] border border-[#22222e]"
+                style={{ width: "47%" }}
+              >
+                <Text className="text-[#9494A8] text-xs font-semibold uppercase tracking-wider mb-1">
+                  {spec.label}
+                </Text>
+                <Text className="text-white font-bold text-base">
+                  {spec.value}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View className="mx-6 mb-6">
+          <Text className="text-white font-bold text-xl mb-4">Features</Text>
+          <View className="flex-row flex-wrap">
+            {car.features.map((f, i) => (
+              <View
+                key={i}
+                className="bg-[#13131a] border border-[#22222e] rounded-2xl px-4 py-2.5 flex-row items-center"
+              >
+                <View className="w-1.5 h-1.5 rounded-full bg-[#e8500a] mr-2" />
+                <Text className="text-white text-sm font-semibold">{f}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View className="mx-6 mb-6 ">
+          <Text className="text-white font-bold text-xl mb-4">
+            Pricing Breakdown
+          </Text>
+          <View className="bg-[#13131a] border border-[#22222e] rounded-3xl overflow-hidden ">
+            {loadingPrice ? (
+              <View>
+                <ActivityIndicator color={"e8500a"} />
+              </View>
+            ) : pricing ? (
+              <>
+                {[
+                  {
+                    label: `Base Price (${pricing.days} day${pricing.days > 1 ? "s" : ""})`,
+                    value: `7${pricing.basePrice.toLocaleString()}`,
+                    highlight: false,
+                  },
+                  {
+                    label: "KM Limit",
+                    value: `${pricing.kmLimitTotal} km total`,
+                    highlight: false,
+                  },
+                  {
+                    label: "Extra KM Charge",
+                    value: `${pricing.extraKmCharge}/km`,
+                    highlight: false,
+                  },
+                  {
+                    label: "Hourly Rate",
+                    value: `${pricing.pricePerHour}/hr`,
+                    highlight: false,
+                  },
+                ].map((row, i, arr) => (
+                  <View
+                    key={i}
+                    className={`flex-row items-center justify-between px-5 py-4 ${i < arr.length - 1 ? "border-b border-[#22222e]" : ""}`}
+                  >
+                    <Text className="text-[9494a8] text-sm font-medium">
+                      {row.label}
+                    </Text>
+                    <Text className="text-white font-bold text-sm">
+                      {row.value}
+                    </Text>
+                  </View>
+                ))}
+              </>
+            ) : null}
           </View>
         </View>
       </ScrollView>
+
+      <View className="absolute bottom-0 left-0 right-0 px-6 pb-8 pt-4 bg-[#0A0A0F] border-t border-[#22222E]">
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => router.push("/(main)/booking-confirm")}
+          className="bg-[#E8500A] rounded-2xl py-5 items-center"
+        >
+          <Text className="text-white font-bold text-base tracking-widest uppercase">
+            Confirm Booking •{" "}
+            {pricing ? `7${pricing.basePrice.toLocaleString()}` : "..."}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
