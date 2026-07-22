@@ -1,7 +1,14 @@
 import { useBookingStore } from "@/store/booking.store";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function bookingConfirm() {
@@ -34,6 +41,14 @@ export default function bookingConfirm() {
       hour12: true,
     });
   };
+
+  const totalHours = Math.round(
+    (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60),
+  );
+
+  const totalDays = Math.ceil(totalHours / 24);
+  const totalPrice = car.pricePerDay * totalDays;
+  const kmLimitTotal = car.kmLimitPerDay * totalDays;
 
   return (
     <SafeAreaView className="flex-1 bg-[#0a0a0f]">
@@ -158,9 +173,122 @@ export default function bookingConfirm() {
                 </View>
               </View>
             </View>
+
+            <View className="flex-row border-t border-[#22222e]">
+              <View className="flex-1 py-3 items-center border-r border-[#22222e]">
+                <Text className="text-white font-bold text-xl">
+                  {totalDays}
+                </Text>
+                <Text className="text-[#9494ab] text-xs font-medium">Days</Text>
+              </View>
+              <View className="flex-1 py-3 items-center border-r border-[#22222e]">
+                <Text className="text-white font-bold text-xl">
+                  {totalHours}
+                </Text>
+                <Text className="text-[#9494ab] text-xs font-medium">
+                  Hours
+                </Text>
+              </View>
+              <View className="flex-1 py-3 items-center border-r border-[#22222e]">
+                <Text className="text-white font-bold text-xl">
+                  {kmLimitTotal}
+                </Text>
+                <Text className="text-[#9494ab] text-xs font-medium">
+                  KM Limit
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
+
+        <View className="mx-6 mb-6 ">
+          <Text className="text-white font-bold text-xl mb-4">
+            Pricing Breakdown
+          </Text>
+          <View className="bg-[#13131a] border border-[#22222e] rounded-3xl overflow-hidden ">
+            {[
+              {
+                label: `Daily Rate <> ${totalDays} day${totalDays > 1 ? "s" : ""})`,
+                value: `₹${car.pricePerDay.toLocaleString()}`,
+              },
+              {
+                label: "KM Limit",
+                value: `${kmLimitTotal} km total`,
+              },
+              {
+                label: "Extra KM Charge",
+                value: `${car.extraKmCharge}/km`,
+              },
+              {
+                label: "Taxes & Fee",
+                value: `Included`,
+              },
+            ].map((row, i, arr) => (
+              <View
+                key={i}
+                className={`flex-row items-center justify-between px-5 py-4 ${i < arr.length - 1 ? "border-b border-[#22222e]" : ""}`}
+              >
+                <Text className="text-[9494a8] text-sm font-medium">
+                  {row.label}
+                </Text>
+                <Text className="text-white font-bold text-sm">
+                  {row.value}
+                </Text>
+              </View>
+            ))}
+
+            <View className="flex-row items-center justify-between py-4">
+              <Text className="text-white font-bold text-lg">Total Amount</Text>
+              <Text className="text-[#e8500a] font-bold text-3xl">
+                ₹{totalPrice.toLocaleString()}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="mx-6 bg-[#00d4aa10] border border-[#00d4aa30] rounded-3xl px-4 py-4">
+          <Text className="text-[#00d4aa] text-xs font-bold tracking-widest uppercase mb-2">
+            Cancellation Policy
+          </Text>
+          <Text className="text-[#9494ab] text-sm leading-6">
+            Free Cancellation up to 1 hour before pickup, No refund after that.
+          </Text>
+        </View>
       </ScrollView>
+
+      <View className="absolute bottom-0 left-0 right-0 pb-8 pt-4 bg-[#0a0a0f] border-t border-[#22222e]">
+        <View className="flex-row items-center justify-between mb-4">
+          <View>
+            <Text className="text-[39494a8] text-xs font-medium">
+              Total Payable{" "}
+            </Text>
+            <Text>₹{totalPrice.toLocaleString()}</Text>
+          </View>
+          <View className="items-end">
+            <Text className="text-[#9494a8] text-xs font-medium">Duration</Text>
+            <Text className="">
+              {totalDays} day{totalDays > 1 ? "s" : ""} • {totalHours}s
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          disabled={loading}
+          activeOpacity={0.85}
+          className="bg-[#e8500a] rouned-2xl py-5 items-center"
+        >
+          {loading ? (
+            <View className="flex-row items-center">
+              <ActivityIndicator color={"#fff"} size={"small"} />
+              <Text>Confirming Booking...</Text>
+            </View>
+          ) : (
+            <Text className="text-white font-bold text-base tracking-widest uppercase">
+              Confirm & Book Now
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
