@@ -1,7 +1,8 @@
 import type { NextFunction, Response } from "express";
 import z from "zod";
+import type { BookingStatus } from "../../generated/prisma/enums";
 import { bookingService } from "../services/bookings.services";
-import { sendError, type AuthenticatedRequest } from "../types";
+import { sendError, sendSuccess, type AuthenticatedRequest } from "../types";
 
 const createBookingSchema = z.object({
   carId: z.string().uuid(),
@@ -43,6 +44,8 @@ export const bookingsController = {
         startTime,
         endTime,
       });
+
+      sendSuccess(res, "Booking confirmed", booking, 201);
     } catch (error) {
       if (error instanceof Error) {
         if (
@@ -57,6 +60,78 @@ export const bookingsController = {
         }
       }
       next(error);
+    }
+  },
+
+  async getMyBookings(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const { status } = req.query;
+      const bookings = await bookingService.userBookings(
+        req.user!.userId,
+        status as BookingStatus | undefined,
+      );
+
+      sendSuccess(res, "Bookings fetched", bookings);
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async getBookingsById(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const id = req.params["id"] as string;
+      const booking = await bookingService.getBookingByID(id, req.user!.userId);
+      sendSuccess(res, "Booking fetched", booking);
+    } catch (error) {
+      if (error instanceof Error && error.message === "Booking not found") {
+        sendError(res, "Booking not found", 404);
+        return;
+      }
+      if (error instanceof Error && error.message === "Unauthorized") {
+        sendError(res, "Unauthorized", 403);
+        return;
+      }
+      next(error);
+    }
+  },
+
+  async cancelBooking(
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const id = req.params["id"] as string;
+      const booking = await bookingService.cancelBooking(id, req.user!.userId);
+      sendSuccess(res, "Booking cancelled", booking);
+    } catch (error) {
+      if (error instanceof Error) {
+        const clientErrors = [
+          "Booking not found",
+          "already cancelled",
+          "cannot cancel",
+          "less than 1 hour",
+        ];
+
+        if (clientErrors.some((e) => error.message.includes(e))) {
+          sendError(res, error.message, 400);
+          return;
+        }
+
+        if (error.message === "Unauthorized") {
+          sendError(res, "Unauthorized", 403);
+          return;
+        }
+        next(error);
+      }
     }
   },
 };
