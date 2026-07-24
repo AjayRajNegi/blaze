@@ -343,7 +343,10 @@ export default function home() {
           </View>
         )}
 
-        <TouchableOpacity className="mx-6 bg-[#13131A] border border-[#22222E] rounded-3xl p-5 flex-row items-center justify-between ">
+        <TouchableOpacity
+          className="mx-6 bg-[#13131A] border border-[#22222E] rounded-3xl p-5 flex-row items-center justify-between"
+          onPress={() => router.push("/(main)/bookings")}
+        >
           <View>
             <Text className="text-white font-bold text-xl mb-1">
               My Bookings

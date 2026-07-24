@@ -1,3 +1,4 @@
+import { bookingService } from "@/services/bookings.service";
 import { useBookingStore } from "@/store/booking.store";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -49,6 +50,28 @@ export default function bookingConfirm() {
   const totalDays = Math.ceil(totalHours / 24);
   const totalPrice = car.pricePerDay * totalDays;
   const kmLimitTotal = car.kmLimitPerDay * totalDays;
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    try {
+      const booking = await bookingService.createBooking({
+        carId: car.id,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+      });
+
+      router.dismissAll();
+      router.replace({
+        pathname: "/(main)/booking-success",
+        params: { bookingId: booking.id },
+      });
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message || "Booking failed. lease try again.";
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-[#0a0a0f]">
@@ -273,6 +296,7 @@ export default function bookingConfirm() {
         </View>
 
         <TouchableOpacity
+          onPress={handleConfirm}
           disabled={loading}
           activeOpacity={0.85}
           className="bg-[#e8500a] rouned-2xl py-5 items-center"
