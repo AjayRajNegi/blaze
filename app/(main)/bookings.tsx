@@ -229,8 +229,105 @@ function BookingCard({
               {booking.car.brand}•{booking.car.fuelType}
             </Text>
           </View>
+          <View className="items-end">
+            <Text className="text-[#e8500a] font-bold text-xl">
+              ₹{booking.totalPrice.toLocaleString()}
+            </Text>
+            <Text className="text-[#5a5a72]">Total</Text>
+          </View>
         </View>
       </View>
+
+      <View className="bg-[#0a0a0f] border border-[#22222e] rounded-2xl p-4 mb-4">
+        <View className="flex-row items-stretch">
+          <View className="items-center mr-3">
+            <View className="w-2.5 h-2.5 rounded-full bg-[#E8500A]" />
+            <View className="w-px flex-1 bg-[#22222E] my-1" />
+            <View className="w-2.5 h-2.5 rounded-full bg-[#00D4AA]" />
+          </View>
+          <View className="flex-1 ">
+            <View className="mb-3">
+              <Text className="text-[#e8500a] text-xs font-bold tracking-widest uppercase mb-1">
+                Pickup
+              </Text>
+              <Text className="text-white font-bold text-base">
+                {formatDate(booking.startTime)}
+              </Text>
+              <Text className="text-[#9494a8] text-sm font-medium">
+                {formatTime(booking.startTime)}
+              </Text>
+            </View>
+
+            <View>
+              <Text className="text-[#00d4aa] text-xs font-bold tracking-wider uppercase mb-0.5">
+                Return
+              </Text>
+              <Text className="text-white font-semibold text-sm">
+                {formatDate(booking.endTime)}
+              </Text>
+              <Text className="text-[#9494a8] text-sm font-medium">
+                {formatTime(booking.endTime)}
+              </Text>
+            </View>
+          </View>
+
+          <View className="items-end justify-between ">
+            <View className="items-end">
+              <Text className="text-white font-bold text-lg">
+                {booking.totalHours}
+              </Text>
+              <Text className="text-[#5a5a72] text-xs">Duration</Text>
+            </View>
+            <View className="items-end">
+              <Text className="text-white font-bold text-lg">
+                {booking.kmLimitTotal}
+              </Text>
+              <Text className="text-[#5a5a72] text-xs">KM Limit</Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="flex-row items-center mb-4 mt-4">
+          <View className="w-1.5 h-1.5 rounded-full bg-[#E8500A] mr-2" />
+          <Text className="text-sm font-medium flex-1 text-[#9494a8]">
+            {booking.car.sublocation.name} • {booking.car.sublocation.city.name}
+          </Text>
+        </View>
+        <View
+          className="flex-row pt-3 border-t border-[#22222E]"
+          style={{ gap: 8 }}
+        >
+          {[
+            `${booking.car.seats} Seats`,
+            booking.car.transmission === "Automatic" ? "Auto" : "Manual",
+            booking.car.fuelType,
+          ].map((s, i) => (
+            <View
+              key={i}
+              className="bg-[#0A0A0F] border border-[#22222E] rounded-xl px-3 py-1.5"
+            >
+              <Text className=" text-white text-xs font-semibold">{s}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {canCancel && (
+        <TouchableOpacity
+          disabled={isCancelling}
+          onPress={() => onCancel(booking.id)}
+          className="mt-4 py-4 rounded-2xl border border-[#FF4D4D40]
+bg-[#FF4D4D10] items-center"
+        >
+          {isCancelling ? (
+            <ActivityIndicator color={"#ff4dfd"} size={"small"} />
+          ) : (
+            <Text className="text-[#FF4D4D] font-bold text-sm tracking-widest uppercase">
+              Cancel Booking
+            </Text>
+          )}
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
