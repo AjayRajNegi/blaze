@@ -3,6 +3,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useBookingStore } from "@/store/booking.store";
 import { City, Sublocations } from "@/types";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -100,6 +101,12 @@ export default function home() {
     setSubLocations(sub);
     setShowSubModal(false);
     setSubSearch("");
+  }, []);
+
+  const handleSearch = useCallback((sub: Sublocations) => {
+    if (!draft.city || !draft.sublocation) return;
+    setTime(startTime, endTime);
+    router.push("/(main)/cars");
   }, []);
 
   return (
@@ -289,6 +296,7 @@ export default function home() {
           </View>
 
           <TouchableOpacity
+            onPress={handleSearch}
             disabled={!canSearch}
             activeOpacity={0.85}
             className={`rounded-2xl py-5 items-center ${canSearch ? "bg-[#E8500A]" : "bg-[#1C1C26]"}`}
@@ -335,7 +343,10 @@ export default function home() {
           </View>
         )}
 
-        <TouchableOpacity className="mx-6 bg-[#13131A] border border-[#22222E] rounded-3xl p-5 flex-row items-center justify-between ">
+        <TouchableOpacity
+          className="mx-6 bg-[#13131A] border border-[#22222E] rounded-3xl p-5 flex-row items-center justify-between"
+          onPress={() => router.push("/(main)/bookings")}
+        >
           <View>
             <Text className="text-white font-bold text-xl mb-1">
               My Bookings
