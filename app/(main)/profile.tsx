@@ -185,8 +185,98 @@ export default function profile() {
               <ActivityIndicator color={"#E850ØA"} />
             </View>
           ) : (
-            <></>
+            <View className="bg-[#13131A] border border-[#22222E] rounded-3xl overflow-hidden">
+              <View className="flex-row">
+                {[
+                  {
+                    label: "Total",
+                    value: stats.total,
+                    color: "#E8500A",
+                  },
+                  { label: "Active", value: stats.confirmed, color: "#00d4aa" },
+                  { label: "Done", value: stats.completed, color: "#9494a8" },
+                ].map((stat, i) => (
+                  <View
+                    key={i}
+                    className={`flex-1 py-5 items-center ${i < 2 ? "border-r border-[#22222e]" : ""}`}
+                  >
+                    <Text
+                      className="font-bold text-3xl mb-1"
+                      style={{ color: stat.color }}
+                    >
+                      {stat.value}
+                    </Text>
+                    <Text className="text-[#9494A8] text-xs font-medium">
+                      (stat.label)
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* Cancelled */}
+              {stats.cancelled > 0 && (
+                <View className="border-t border-[#22222E] px-5 py-3 flex-row items-center justify-between">
+                  <Text className=" text-[#9494A8] text-sm font-medium">
+                    Cancelled bookings
+                  </Text>
+                  <Text className="text-[#FF4D4D] font-bold text-base">
+                    {stats.cancelled}
+                  </Text>
+                </View>
+              )}
+            </View>
           )}
+        </View>
+
+        {/* Menu Section */}
+        {menuItems.map((section, si) => (
+          <TouchableOpacity key={si} className="mx-6 mb-6">
+            <Text className="text-[#9494A8] text-xs font-bold tracking-[3px] uppercase mb-3">
+              {section.section}
+            </Text>
+            <View className="bg-[#13131A] border border-[#22222E] rounded-3xl overflow-hidden">
+              {section.items.map((item, ii) => (
+                <TouchableOpacity
+                  key={ii}
+                  onPress={item.onPress}
+                  activeOpacity={0.7}
+                  className={`flex-row items-center justify-between px-5 py-4 ${ii < section.items.length - 1 ? "border-red" : "border-white"}`}
+                >
+                  <View className="flex-1">
+                    <Text className=" text-white font-semibold text-base">
+                      (item.label)
+                    </Text>
+                    <Text className=" text-[#5A5A72] text-xs mt-0.5">
+                      {item.sub}
+                    </Text>
+                  </View>
+                  {item.arrow && (
+                    <Text className="text-[#E8500a] font-bold text-xl ml-3">
+                      ˃
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          </TouchableOpacity>
+        ))}
+
+        {/* App info */}
+        <View className="mx-6">
+          <TouchableOpacity
+            onPress={handleLogout}
+            disabled={isLoading}
+            activeOpacity={0.85}
+            className="border border-[#ff4d4d4d] bg-[#ff4df410] rounded-2xl py-5 items-center"
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#FF4D4D" size="small" />
+            ) : (
+              <Text className="text-[#FF4D4D] font-bold text-sm tracking-widest uppercase">
+                Sign Out
+              </Text>
+            )}
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>
