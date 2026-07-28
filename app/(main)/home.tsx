@@ -125,7 +125,10 @@ export default function home() {
             </Text>
           </View>
 
-          <TouchableOpacity className="w-14 h-14 rounded-2xl bg-[#E8500A] items-center justify-center">
+          <TouchableOpacity
+            onPress={() => router.push("/(main)/profile")}
+            className="w-14 h-14 rounded-2xl bg-[#E8500A] items-center justify-center"
+          >
             <Text style={{ color: "white", fontSize: 20, fontWeight: "bold" }}>
               {user?.firstName?.[0].toUpperCase()}
             </Text>
