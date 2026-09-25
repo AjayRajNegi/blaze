@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+  ELECTRIC
+  CNG
+}
+
+enum TransmissionType {
+  MANUAL
+  AUTOMATIC
+}
+
+enum CarStatus {
+  AVAILABLE
+  BOOKED
+  MAINTENANCE
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  phone        String   @unique
+  passwordHash String   @map("password_hash")
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  role         UserRole @default(USER)
+  isVerified   Boolean  @default(false) @map("is_verified")
+  isActive     Boolean  @default(true) @map("is_active")
+  profileImage String?  @map("profile_image")
+
+  refreshTokens RefreshToken[]
+  bookings      Booking[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime @default(now()) @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("refresh_tokens")
+}
+
+model City {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  state        String
+  isActive     Boolean       @default(true) @map("is_active")
+  subLocations SubLocation[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cities")
+}
+
+model SubLocation {
+  id        String  @id @default(uuid())
+  name      String
+  address   String
+  latitude  Float
+  longitude Float
+  cityId    String  @map("city_id")
+  city      City    @relation(fields: [cityId], references: [id])
+  isActive  Boolean @default(true) @map("is_active")
+  car       Car[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, cityId])
+  @@map("sub_location")
+}
+
+model Car {
+  id             String           @id @default(uuid())
+  name           String
+  brand          String
+  year           String
+  registrationNo String           @unique @map("registration_no")
+  fuelType       FuelType         @map("fuel_type")
+  transmission   TransmissionType
+  seats          Int
+  kmLimitPerDay  Int              @map("km_limit_per_day")
+  pricePerHour   Float            @map("price_per_hour")
+  pricePerDay    Float            @map("price_per_day")
+  extraKmCharge  Float            @map("extra_km_charge")
+  status         CarStatus        @default(AVAILABLE)
+  images         String[]
+  features       String[]
+  subLocationId  String           @map("sub_location_id")
+
+  bookings Booking[]
+
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  subLocation SubLocation @relation(fields: [subLocationId], references: [id])
+
+  @@map("cars")
+}
+
+model Booking {
+  id            String        @id @default(uuid())
+  userId        String        @map("user_id")
+  user          User          @relation(fields: [userId], references: [id])
+  carId         String        @map("car_id")
+  car           Car           @relation(fields: [carId], references: [id])
+  startTime     DateTime      @map("start_time")
+  endTime       DateTime      @map("end_time")
+  status        BookingStatus @default(PENDING)
+  totalHours    Float         @map("total_hours")
+  basePrice     Float         @map("base_price")
+  totalPrice    Float         @map("total_price")
+  kmLimitTotal  Int           @map("km_limit_total")
+  pickupAddress String        @map("pickup_address")
+  notes         String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("bookings")
+}
