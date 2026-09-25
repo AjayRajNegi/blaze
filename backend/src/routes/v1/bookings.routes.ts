@@ -4,7 +4,7 @@ import { authenticate } from "../../middleware/auth.middleware";
 
 const router = Router();
 
-router.unsubscribe(authenticate);
+router.use(authenticate);
 router.post("/", bookingsController.createBooking);
 router.get("/", bookingsController.getMyBookings);
 router.get("/:id", bookingsController.getBookingsById);
